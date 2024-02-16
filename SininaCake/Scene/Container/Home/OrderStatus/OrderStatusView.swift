@@ -2,17 +2,17 @@
 //  OrderStatusView.swift
 //  SininaCake
 //
-//  Created by 이종원 on 1/15/24.
+//  Created by 박채운 on 2/16/24.
 //
 
 import SwiftUI
 
+
+
 struct OrderStatusView: View {
     
-    
-    @StateObject var orderListVM = OrderListViewModel()
-    
-    @State var toto = false
+    let orderData: [OrderItem]
+    let orderItem: OrderItem
     
     var body: some View {
         NavigationStack {
@@ -31,7 +31,7 @@ struct OrderStatusView: View {
                     }
                 )
             
-            if false {
+            if !orderData.isEmpty {
                 
                 Rectangle()
                     .foregroundColor(.clear)
@@ -57,7 +57,7 @@ struct OrderStatusView: View {
                                             .clipped()
                                         
                                     )
-                                statusView
+                                statusView(orderItem: orderItem)
                             }
                             
                             
@@ -94,7 +94,7 @@ struct OrderStatusView: View {
                                     .kerning(0.45)
                                     .foregroundColor(Color(UIColor.customDarkGray))
                                 ZStack() {
-                                    if toto == true {
+                                    if orderData.isEmpty {
                                         NavigationLink(destination: OrderView()){
                                             
                                             Text("주문하러 가기")
@@ -109,20 +109,6 @@ struct OrderStatusView: View {
                                                 .kerning(0.4)
                                                 .foregroundColor(.white)
                                         }
-                                    } else { NavigationLink(destination: CalendarView()){
-                                        
-                                        Text("주문하러 가기")
-                                            .frame(width: 161, height: 43)
-                                            .background(Color(UIColor.customBlue))
-                                        
-                                            .cornerRadius(45)
-                                            .font(
-                                                Font.custom("Pretendard", fixedSize: 16)
-                                                    .weight(.semibold)
-                                            )
-                                            .kerning(0.4)
-                                            .foregroundColor(.white)
-                                        }
                                     }
                                 }
                                 
@@ -134,16 +120,31 @@ struct OrderStatusView: View {
         }
     }
     
+  
     
-    
-    
-    
-    private var statusView: some View {
-        let orderItem: OrderItem = OrderItem(id:"", email:"" ,date: Date(), orderTime: Date(), cakeSize: "", sheet: "초코시트", cream: "블루베리",icePack: .none, name: "이찰떡", phoneNumber: "010-1234-5678", text: "", imageURL: [""], comment: "",expectedPrice:25000, confirmedPrice:25000, status: .assign)
+    var dateString: String? {
+        let date =  Date()                     // 넣을 데이터(현재 시간)
+        let myFormatter = DateFormatter()
+        myFormatter.dateFormat = "YYYY/MM/dd(EEEEE)"  // 변환할 형식
+        myFormatter.locale = Locale(identifier: "ko_KR")
+        let dateString = myFormatter.string(from: date)
         
-        
-        
-        return Rectangle()
+        return dateString
+    }
+    
+    
+    
+ 
+}
+
+
+
+
+struct statusView: View {
+    let orderItem: OrderItem
+    
+    var body: some View {
+        Rectangle()
             .foregroundColor(.clear)
             .frame(width: 312, height: 203)
             .background(
@@ -151,7 +152,7 @@ struct OrderStatusView: View {
                     Spacer()
                     
                     HStack {
-                        CustomText(title: dateToString(orderItem.date), textColor: .black, textWeight: .semibold, textSize: 18)
+                        CustomText(title: orderItem.date.dateToString(), textColor: .black, textWeight: .semibold, textSize: 18)
                         
                         Spacer()
                         Spacer()
@@ -162,7 +163,7 @@ struct OrderStatusView: View {
                             .font(.custom("PreTendard", fixedSize: 18))
                             .foregroundStyle(Color(.customBlue))
                         
-                        CustomText(title: dateToTime(orderItem.date), textColor: .customBlue, textWeight: .semibold, textSize: 18)
+                        CustomText(title: orderItem.date.dateToTime(), textColor: .customBlue, textWeight: .semibold, textSize: 18)
                     }
                     
                     HStack {
@@ -197,59 +198,10 @@ struct OrderStatusView: View {
     }
     
     
-    
-    
-    
-    
-    
-    
-    var dateString: String? {
-        let date =  Date()                     // 넣을 데이터(현재 시간)
-        let myFormatter = DateFormatter()
-        myFormatter.dateFormat = "YYYY/MM/dd(EEEEE)"  // 변환할 형식
-        myFormatter.locale = Locale(identifier: "ko_KR")
-        let dateString = myFormatter.string(from: date)
-        
-        return dateString
-    }
-    
-    
-    
-    var timeString: String? {
-        let date =  Date()                     // 넣을 데이터(현재 시간)
-        let myFormatter = DateFormatter()
-        myFormatter.dateFormat = "HH:mm"  // 변환할 형식
-        myFormatter.locale = Locale(identifier: "ko_KR")
-        let timeString = myFormatter.string(from: date)
-        
-        return timeString
-    }
-    
-    private func dateToString(_ date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "ko-KR")
-        dateFormatter.dateFormat = "yyyy/MM/dd(E)"
-        
-        let dateString = dateFormatter.string(from: date)
-        return dateString
-    }
-    
-    private func dateToTime(_ date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        
-        let timeString = dateFormatter.string(from: date)
-        return timeString
-    }
+ 
 }
 
-
-
-
-
-
-
-#Preview {
-    OrderStatusView()
-}
+//#Preview {
+//    OrderStatusView()
+//}
 
