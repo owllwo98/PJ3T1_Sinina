@@ -9,6 +9,7 @@ struct CalendarView: View {
     
     @Environment(\.sizeCategory) var sizeCategory
     
+    @ObservedObject var dateValueVM = DateValueViewModel()
     
     var dateString: String? {
         let date =  Date()                     // 넣을 데이터(현재 시간)
@@ -27,9 +28,7 @@ struct CalendarView: View {
     
     @State var daysList = [[DateValue]]()
     
-    //@State var clickedDates: Set<Date> = []
-    //@State private var clickedDates: Set<Date> = Set()
-    
+
     //화살표 클릭에 의한 월 변경 값
     @State var monthOffset = 0
     
@@ -41,7 +40,6 @@ struct CalendarView: View {
     var body: some View {
         
         VStack() {
-            
             //            Text("🗓️ 이달의 스케줄")
             //                .font(
             //                    Font.custom("Pretendard", fixedSize: 24)
@@ -164,7 +162,7 @@ struct CalendarView: View {
                     
                     ForEach(daysList[i].indices, id: \.self) { j in
                         
-                        CardView(isReadOnly: false, value: $daysList[i][j], schedule: testSchedule)
+                        CardView(value: $daysList[i][j], schedule: testSchedule, dateValueViewModel:dateValueVM,isReadOnly: false)
                         
                         
                     }
@@ -173,14 +171,33 @@ struct CalendarView: View {
                 
             }
         }
-        
+        .onDisappear()
         .onChange(of: monthOffset) { _ in
             // updating Month...
+            print("onchange - monthoffset, \(monthOffset)")
             currentDate = getCurrentMonth()
             daysList = extractDate()
+            dateValueVM.loadDataFromFirestore()
         }
-        .task {
-            daysList = extractDate()
+        .onChange(of:dateValueVM.dateValues) { _ in
+            print("onchange - dataValues , \(dateValueVM.dateValues.count)")
+            for dv in dateValueVM.dateValues {
+                if currentDate.month == dv.date.month {
+                    print("onchange - month : \(dv.date.month)")
+                    for i in daysList.indices {
+                        for j in daysList[i].indices {
+                            if daysList[i][j].day == dv.day {
+                                daysList[i][j] = dv
+                            }
+                        }
+                    }
+                }
+            }
+            
+            
+        }
+        .onAppear() {
+            monthOffset = Int(month()) ?? 0
         }
         
         
@@ -338,16 +355,21 @@ struct CalendarView: View {
 
 struct CardView: View {
     
-    @State var isReadOnly: Bool
+    
     @Binding var value: DateValue
     
     @State var schedule: Schedule
     
-    @State private var showSheet = false
-    @State private var selectedDate = Date()
+    @ObservedObject var dateValueViewModel: DateValueViewModel
+
+    //@State private var selectedDate = Date()
+    
+    @State var isReadOnly: Bool
+    
     
     func selectedDate2() {
         if isReadOnly == false {
+            value.saveDateValueToFirestore(dateValue: value)
             value.selectedToggle()
             // 클릭할 때마다 클릭 여부를 변경
             
@@ -355,18 +377,20 @@ struct CardView: View {
         }
     }
     
+ 
     
     var body: some View {
         
+        
         ZStack() {
-            //                ZStack() {
-            //                    if showSheet == false {
-            //                        NavigationLink(destination: OrderView()){
-            //                            Text("\(value.day)")
-            //                        }
-            //                    }
-            //                }
-            
+            if true {
+                
+                ZStack() {
+                    Text(".")
+                        .font(.system(size: 30))  // 텍스트 크기를 조절하여 점처럼 보이게 함
+                        .foregroundColor(Color.black)
+                }
+            }
             HStack {
                 
                 if value.day > 0 {
@@ -375,15 +399,20 @@ struct CardView: View {
                             .font(.custom("Pretendard-SemiBold", fixedSize: 18))
                             .foregroundColor(Color(UIColor.customGray))
                             .padding([.leading, .bottom], 10)
+                        
                     } else {
                         if schedule.startDate.withoutTime() < value.date && value.date <= schedule.endDate
                         {
                             Text("\(value.day)")
                                 .font(.custom("Pretendard-SemiBold", fixedSize: 18))
                                 .foregroundColor(value.isSelected ? Color(UIColor.customBlue) : (value.isSecondSelected ? Color(UIColor.customDarkGray) : Color(UIColor.customRed)))
+                                //.foregroundColor(dateValueViewModel.getTextColorForDateValue(value))
                                 .padding([.leading, .bottom], 10)
                                 .onTapGesture {
+                                    
                                     selectedDate2()
+                                    let dateValue = DateValue(day: value.day, date: value.date.withoutTime())
+                                    dateValueViewModel.removeDuplicateDay(dateValue: dateValue)
                                     
                                 }
                             
@@ -409,12 +438,15 @@ struct CardView: View {
                         else {
                             Text("\(value.day)")
                                 .font(.custom("Pretendard-SemiBold", fixedSize: 18))
-                                .foregroundColor((value.date.weekday == 1 || value.date.weekday == 2) ? Color(UIColor.customDarkGray) : (value.isSelected ? Color(UIColor.customDarkGray) : (value.isSecondSelected ? Color(UIColor.customRed) : Color(UIColor.customBlue))))
-                            //                            .foregroundColor(value.date.weekday == 1 || value.date.weekday == 2 ? .init(cgColor: CGColor(red: 0.6, green: 0.6, blue: 0.6, alpha: 1)) : value.date.weekday == 7 ? Color(UIColor.customBlue) : .black) //일요일 red 토요일 blue
+                                .foregroundColor((value.date.weekday == 1 || value.date.weekday == 2) ? (value.isSelected ? Color(UIColor.customBlue) : (value.isSecondSelected ? Color(UIColor.customRed) : Color(UIColor.customDarkGray))) : (value.isSelected ? Color(UIColor.customDarkGray) : (value.isSecondSelected ? Color(UIColor.customRed) : Color(UIColor.customBlue))))
                                 .padding([.leading, .bottom], 10)
                                 .onTapGesture {
-                                    
+                                    let DateValue = DateValue(day: value.day, date: Date())
+                                    dateValueViewModel.removeDuplicateDay(dateValue: DateValue)
+                                
                                     selectedDate2()
+                                    
+                                    
                                 }
                             
                         }
@@ -426,81 +458,17 @@ struct CardView: View {
                 
             }
             
+            
         }
         .frame(width: UIScreen.main.bounds.width / 13)
         .frame(height: 40)
-        //.frame(maxHeight: .infinity)
-        //.contentShape(Rectangle())
+        
         
     }
 }
 
 
-
-//struct pickerView: View {
-//    @Environment(\.dismiss) var dismiss
-//    @Environment(\.colorScheme) var colorScheme
-//    @State private var selectedDate = Date()
-//
-//
-//
-//    //@State private var selectedFlavor = Flavor.chocolate
-//    init() {
-//     UIDatePicker.appearance().backgroundColor = UIColor.init(.clear) // changes bg color
-//            UIDatePicker.appearance().tintColor = UIColor.init(.blue) // changes font color
-//
-//    }
-//
-//
-//    var body: some View {
-//        HStack {
-//
-//
-//            DatePicker("", selection: $selectedDate, in: Date()..., displayedComponents: [.date, .hourAndMinute])
-//
-//
-//                        //.environment(\.colorScheme, .light)
-//                .colorMultiply(Color(red: 0.45, green: 0.76, blue: 0.87))
-//                        //.colorInvert()
-//                            .labelsHidden()
-//                            //.accentColor(.clear)
-//                            .datePickerStyle(WheelDatePickerStyle())
-//                            .environment(\.locale, Locale(identifier: "ko_GB"))
-//                            .opacity(1)
-//                            .onAppear {
-//                                UIDatePicker.appearance().locale?.hourCycle
-//                                UIDatePicker.appearance().minuteInterval = 10
-//
-//                            }
-//                            .onTapGesture {
-//                                dismiss()
-//                            }
-//                            .foregroundColor(Color.red)
-//                            .background(
-//                                RoundedRectangle(cornerRadius: 10)
-//                                    .foregroundColor(.clear)
-//                                    .frame(width: 342, height: 241)
-//                                    .opacity(1.0)
-//                                    .padding()
-//                            )
-//                            .padding()
-//
-//
-//
-//        }
-//
-//    }
-//
-//
-//
-//
+//#Preview {
+//    CalendarView()
+//    
 //}
-
-
-
-
-
-#Preview {
-    CalendarView()
-    
-}

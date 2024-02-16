@@ -16,7 +16,7 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 VStack {
-                    OrderStatusView()
+                   // OrderStatusView()
                     InstagramView()
                     MapView()
                 }
