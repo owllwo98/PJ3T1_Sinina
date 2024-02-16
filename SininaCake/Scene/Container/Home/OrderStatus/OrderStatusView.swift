@@ -10,9 +10,8 @@ import SwiftUI
 struct OrderStatusView: View {
     
     
-    @StateObject var orderListVM = OrderListViewModel()
+    let orderData: [OrderItem]
     
-    @State var toto = false
     
     var body: some View {
         NavigationStack {
@@ -31,7 +30,7 @@ struct OrderStatusView: View {
                     }
                 )
             
-            if false {
+            if !orderData.isEmpty {
                 
                 Rectangle()
                     .foregroundColor(.clear)
@@ -94,7 +93,7 @@ struct OrderStatusView: View {
                                     .kerning(0.45)
                                     .foregroundColor(Color(UIColor.customDarkGray))
                                 ZStack() {
-                                    if toto == true {
+                                    if orderData.isEmpty {
                                         NavigationLink(destination: OrderView()){
                                             
                                             Text("주문하러 가기")
@@ -249,7 +248,7 @@ struct OrderStatusView: View {
 
 
 
-#Preview {
-    OrderStatusView()
-}
+//#Preview {
+//    OrderStatusView()
+//}
 
