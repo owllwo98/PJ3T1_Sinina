@@ -28,7 +28,7 @@ struct CalendarView: View {
     
     @State var daysList = [[DateValue]]()
     
-
+    
     //화살표 클릭에 의한 월 변경 값
     @State var monthOffset = 0
     
@@ -361,7 +361,7 @@ struct CardView: View {
     @State var schedule: Schedule
     
     @ObservedObject var dateValueViewModel: DateValueViewModel
-
+    
     //@State private var selectedDate = Date()
     
     @State var isReadOnly: Bool
@@ -377,7 +377,7 @@ struct CardView: View {
         }
     }
     
- 
+    
     
     var body: some View {
         
@@ -406,7 +406,7 @@ struct CardView: View {
                             Text("\(value.day)")
                                 .font(.custom("Pretendard-SemiBold", fixedSize: 18))
                                 .foregroundColor(value.isSelected ? Color(UIColor.customBlue) : (value.isSecondSelected ? Color(UIColor.customDarkGray) : Color(UIColor.customRed)))
-                                //.foregroundColor(dateValueViewModel.getTextColorForDateValue(value))
+                            //.foregroundColor(dateValueViewModel.getTextColorForDateValue(value))
                                 .padding([.leading, .bottom], 10)
                                 .onTapGesture {
                                     
@@ -443,7 +443,7 @@ struct CardView: View {
                                 .onTapGesture {
                                     let DateValue = DateValue(day: value.day, date: Date())
                                     dateValueViewModel.removeDuplicateDay(dateValue: DateValue)
-                                
+                                    
                                     selectedDate2()
                                     
                                     
@@ -468,7 +468,7 @@ struct CardView: View {
 }
 
 
-//#Preview {
-//    CalendarView()
-//    
-//}
+#Preview {
+    CalendarView()
+    
+}
