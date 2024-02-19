@@ -16,6 +16,7 @@ import KakaoSDKAuth
 struct SininaCakeApp: App {
     // register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject var path = Path()
     
     init() {
         // Kakao SDK 초기화
@@ -26,6 +27,7 @@ struct SininaCakeApp: App {
     var body: some Scene {
         WindowGroup {
             SplashView()
+                .environmentObject(path)
         }
     }
 }

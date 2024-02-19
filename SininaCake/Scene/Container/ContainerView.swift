@@ -8,19 +8,46 @@
 import SwiftUI
 import Firebase
 
+class Path: ObservableObject {
+    @Published var path = NavigationPath()
+    
+    enum Route: Hashable {
+        case caution
+        case order
+        case userConfirm
+    }
+    
+    func reset() {
+        path = NavigationPath()
+    }
+    
+//    func nextView(_ view: Route) -> any View {
+//        switch Route {
+//        case .caution:
+//            CautionView()
+//        case .order:
+//            OrderView()
+//        case .userConfirm:
+//            UserConfirmOrderDetailView()
+//        }
+//    }
+}
+
+
 struct ContainerView: View {
     @State var currentTab: Tab = .home
     @State private var showManager = false
     @State private var showNavManager = false
     @ObservedObject var loginVM = LoginViewModel.shared
     @ObservedObject var chatVM = ChatViewModel.shared
+    @EnvironmentObject var path: Path
     
     init() {
         UITabBar.appearance().isHidden = true
     }
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path.path) {
             ZStack(alignment: .bottom) {
                 TabView(selection: $currentTab) {
                     HomeView()
@@ -95,9 +122,14 @@ func getTab(tab: Tab) -> String {
 }
 
 struct OrderButtonView: View {
+    @EnvironmentObject var path: Path
     
     var body: some View {
         NavigationLink(destination: CautionView()) {
+//            CustomButton(action: {
+//                
+//            }, title: "주문하기", titleColor: .white, backgroundColor: .customBlue, leading: 24, trailing: 24)
+//            .padding(.top, 24)
             HStack {
                 Spacer()
                 CustomText(title: "주문하기", textColor: .white, textWeight: .semibold, textSize: 18)

@@ -10,30 +10,29 @@ struct CautionView: View {
     @State private var Next: Bool = false
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                ScrollView(showsIndicators: false){
-                    ScrollTitleView(cautionAll: $cautionAll, pickUp: $pickUp, cakeCaution: $cakeCaution, instaUpload: $instaUpload, Next: $Next)
-                }
+
+        VStack {
+            ScrollView(showsIndicators: false){
+                ScrollTitleView(cautionAll: $cautionAll, pickUp: $pickUp, cakeCaution: $cakeCaution, instaUpload: $instaUpload, Next: $Next)
             }
-            .navigationBarBackButtonHidden()
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("주문 전 확인사항")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { presentationMode.wrappedValue.dismiss() }, label: {
-                        Image("angle-left")
-                            .foregroundStyle(Color.black)
-                    })
-                }
-            }
-            NavigationLink(destination: OrderView().navigationBarBackButtonHidden(), label: {
-                ConfirmButton(cautionAll: $cautionAll,
-                              pickUp: $pickUp,
-                              cakeCaution: $cakeCaution,
-                              instaUpload: $instaUpload,
-                              isAgreed: $Next)})
         }
+        .navigationBarBackButtonHidden()
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("주문 전 확인사항")
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { presentationMode.wrappedValue.dismiss() }, label: {
+                    Image("angle-left")
+                        .foregroundStyle(Color.black)
+                })
+            }
+        }
+        NavigationLink(destination: OrderView().navigationBarBackButtonHidden(), label: {
+            ConfirmButton(cautionAll: $cautionAll,
+                          pickUp: $pickUp,
+                          cakeCaution: $cakeCaution,
+                          instaUpload: $instaUpload,
+                          isAgreed: $Next)})
     }
 }
 
@@ -262,6 +261,8 @@ struct ConfirmButton: View {
 }
 
 #Preview {
-    CautionView()
+    NavigationStack {
+        CautionView()
+    }
 }
 

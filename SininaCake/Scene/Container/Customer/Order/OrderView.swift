@@ -10,41 +10,41 @@ struct OrderView: View {
     @StateObject var loginVM = LoginViewModel.shared
     
     var body: some View {
-        NavigationView{
-            VStack{
-                ScrollView(showsIndicators: false){
-                    infoView(orderData: OrderVM)
-                    
-                    OrderCalendarView(orderData: OrderVM)
-                    
-                    OrderCakeView(orderData: OrderVM)
-                    
-                    OrderSheetView(orderData: OrderVM)
-                    
-                    OrderCreamView(orderData: OrderVM)
-                    
-                    OrderTextView(orderData: OrderVM)
-                    
-                    OrderPhotoView(photoVM: photoVM)
-                    
-                    OrderIcePackView(orderData: OrderVM)
-                    
-                    
-                    OrderCommentView(orderData: OrderVM)
-                }
-            }
-            .navigationBarBackButtonHidden()
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("주문하기")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { presentationMode.wrappedValue.dismiss() }, label: {
-                        Image("angle-left")
-                            .foregroundStyle(Color.black)
-                    })
-                }
+        
+        VStack{
+            ScrollView(showsIndicators: false){
+                infoView(orderData: OrderVM)
+                
+                OrderCalendarView(orderData: OrderVM)
+                
+                OrderCakeView(orderData: OrderVM)
+                
+                OrderSheetView(orderData: OrderVM)
+                
+                OrderCreamView(orderData: OrderVM)
+                
+                OrderTextView(orderData: OrderVM)
+                
+                OrderPhotoView(photoVM: photoVM)
+                
+                OrderIcePackView(orderData: OrderVM)
+                
+                
+                OrderCommentView(orderData: OrderVM)
             }
         }
+        .navigationBarBackButtonHidden()
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("주문하기")
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { presentationMode.wrappedValue.dismiss() }, label: {
+                    Image("angle-left")
+                        .foregroundStyle(Color.black)
+                })
+            }
+        }
+        
         
         BottomView(orderVM: OrderVM, photoVM: photoVM, loginVM: loginVM)
     }
@@ -616,14 +616,12 @@ private struct BottomView: View {
             }
             
             CustomButton(action: {
-                defer {
-                    clickedConfirm = true
-                };
+                defer { clickedConfirm = true }
                 for i in 0...photoVM.selectedImages.count - 1 {
                     photoVM.uploadPhoto(i, orderVM.orderItem.id);
                     orderVM.imgURL(i)
-                };
-                orderVM.orderItem.expectedPrice = orderVM.expectedPrice();
+                }
+                orderVM.orderItem.expectedPrice = orderVM.expectedPrice()
                 orderVM.orderItem.email = loginVM.loginUserEmail ?? ""},
                          title: "예약하기",
                          titleColor: .white,
@@ -632,8 +630,9 @@ private struct BottomView: View {
             .kerning(0.45)
             .padding(.vertical, 12)
             .disabled(!orderVM.isallcheck() || photoVM.selectedImages.isEmpty)
-            .navigationDestination(isPresented: $clickedConfirm, destination: {
-                UserConfirmOrderDetailView(orderVM: orderVM)})
+            .navigationDestination(isPresented: $clickedConfirm) {
+                UserConfirmOrderDetailView(orderVM: orderVM)
+            }
         }
     }
 }

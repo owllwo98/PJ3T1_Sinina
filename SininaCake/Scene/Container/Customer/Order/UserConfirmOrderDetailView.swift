@@ -9,23 +9,24 @@ import SwiftUI
 
 struct UserConfirmOrderDetailView: View {
     
+    @EnvironmentObject var path: Path
     @ObservedObject var orderVM: OrderViewModel
-//    @Binding var stackCount
     
     var body: some View {
         VStack {
             UserDetailView(orderItem: orderVM.orderItem)
+            
             CustomButton(action: {
                 orderVM.addOrderItem()
-                
-            }, title: "주문서 보내기", titleColor: .white, backgroundColor: .customBlue, leading: 12, trailing: 12)
+                path.reset()},
+                         title: "주문서 보내기",
+                         titleColor: .white,
+                         backgroundColor: .customBlue, leading: 12, trailing: 12)
         }
     }
 }
 
-// TODO:OrderViewModel 전달해서 여기서 주문 DB에 저장 
 
-
-//#Preview {
-//    UserConfirmOrderDetailView(orderVM: )
-//}
+#Preview {
+    UserConfirmOrderDetailView(orderVM: OrderViewModel(orderItem: OrderItem(id: UUID().uuidString, email: "", date: Date(), orderTime: Date(), cakeSize: "도시락", sheet: "바닐라 시트", cream: "크림치즈 \n프로스팅", icePack: .none, name: "", phoneNumber: "", text: "", imageURL: [], comment: "", expectedPrice: 0, confirmedPrice: 0, status: .notAssign)))
+}
