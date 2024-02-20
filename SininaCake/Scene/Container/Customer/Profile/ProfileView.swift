@@ -258,13 +258,15 @@ struct UnlinkButton: View {
                 let secondButton = Alert.Button.destructive(Text("회원탈퇴")) {
                     loginVM.handleKakaoUnlink()
                     loginVM.handleFBAuthUnlink()
-                    
+                  
                     loginVM.loginUserEmail = nil
                     loginVM.userName = nil
                     loginVM.imgURL = nil
                     appInfo.currentUser = nil
                     
                     isNextScreenActive = true
+                    
+                    UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
                 }
                 return Alert(title: Text("회원탈퇴"),
                              message: Text("정말로 회원탈퇴 하시겠습니까?"),

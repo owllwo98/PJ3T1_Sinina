@@ -89,7 +89,6 @@ extension AppDelegate: MessagingDelegate {
         
         if let fcmToken = fcmToken {
             AppInfo.shared.deviceToken = fcmToken
-
         }
         
         let dataDict: [String: String] = ["token": fcmToken ?? ""]

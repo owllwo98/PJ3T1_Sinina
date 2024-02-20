@@ -15,6 +15,7 @@ import GoogleSignIn
 import KakaoSDKCommon
 import KakaoSDKAuth
 import KakaoSDKUser
+import FirebaseMessaging
 
 class LoginViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelegate {
     static let shared = LoginViewModel()
@@ -163,11 +164,9 @@ extension LoginViewModel {
     
     /// 카카오 유저 정보 획득
     func getKakaoUserInfo() {
+        print("getKakaoUserInfo 시작")
         UserApi.shared.me() {(user, error) in
-            if let error = error {
-                print(error)
-            }
-            else {
+            if error == nil {
                 print("me() success.")
                 let email = user?.kakaoAccount?.email ?? ""
                 let imgURL = user?.kakaoAccount?.profile?.thumbnailImageUrl?.absoluteString ?? ""
@@ -181,15 +180,21 @@ extension LoginViewModel {
                                    imgURL: imgURL,
                                    userName: userName)
             }
+            else {
+                print("여기 \(String(describing: error))")
+            }
         }
+        print("getKakaoUserInfo 끝")
     }
+
     
     /// 유저 정보 저장
     func storeUserInfo(email: String, imgURL: String, userName: String) {
+        print("storeUserInfo 시작")
         guard let deviceToken = AppInfo.shared.deviceToken else {
             return
         }
-        
+
         Task {
             await self.checkManager(email: email)
             
@@ -198,6 +203,7 @@ extension LoginViewModel {
                                               userName: userName,
                                               deviceToken: deviceToken)
         }
+        print("storeUserInfo 끝")
     }
 }
 
@@ -212,7 +218,7 @@ extension LoginViewModel {
             
             guard let user = result?.user else { return }
             self.loginUserEmail = user.email
-            print("로그인한 사람: \(self.loginUserEmail)")
+            print("로그인한 사람: \(String(describing: self.loginUserEmail))")
             AppInfo.shared.currentUser = user
             let userInfo = self.getFirebaseUserInfo(user: user)
             
@@ -222,7 +228,8 @@ extension LoginViewModel {
     
     // FIXME: - 회원가입일때만 저장
     /// 유저 정보 파이어스토어에 저장
-    func addUserInfoToFirestore(email: String, imgURL: String, userName: String, deviceToken: String) async {
+    func addUserInfoToFirestore(email: String, imgURL: String, userName: String, deviceToken: String?) async {
+        print("addUserInfoToFirestore 시작")
         let db = Firestore.firestore()
         
         do {
@@ -236,7 +243,7 @@ extension LoginViewModel {
         } catch {
             print("Error writing document: \(error)")
         }
-        
+        print("addUserInfoToFirestore 끝")
         // 회원가입과 동시에 채팅방 생성
         // FIXME: 로그인할 때마다 방이 생김(이미 있으면 생성 안하게 만들기)
         chatVM.addChatRoom(chatRoom: ChatRoom(userEmail: email, id: email))
